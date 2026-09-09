@@ -1,20 +1,32 @@
 workflows:
   ios-build:
     name: iOS Build
-    instance_type: mac_mini_m2
     max_build_duration: 60
+    instance_type: mac_mini_m1
     environment:
       node: 22.11.0
       xcode: 15.4
       cocoapods: default
     scripts:
-      - name: Install dependencies
+      - name: Node version
+        script: |
+          node -v
+          npm -v
+      - name: Install npm
         script: |
           npm install
-          npx cap sync ios
-          cd ios/App && pod install
-      - name: Build iOS without signing
+      - name: Check folders
         script: |
-          xcodebuild -workspace ios/App/App.xcworkspace -scheme App -configuration Debug CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO -sdk iphoneos -derivedDataPath ./build
+          ls -la
+          ls -la ios/App || echo "ios missing"
+      - name: Capacitor sync
+        script: |
+          npx cap sync ios
+      - name: Pod install
+        script: |
+          cd ios/App && pod install --repo-update
+      - name: Build
+        script: |
+          xcodebuild -workspace ios/App/App.xcworkspace -scheme App -configuration Debug -sdk iphoneos -derivedDataPath ./build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
     artifacts:
       - build/Build/Products/Debug-iphoneos/*.app
