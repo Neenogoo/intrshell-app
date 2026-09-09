@@ -5,28 +5,23 @@ workflows:
     instance_type: mac_mini_m1
     environment:
       node: 22.11.0
-      xcode: latest
+      xcode: 15.4
       cocoapods: default
     scripts:
-      - name: Node version
-        script: |
-          node -v
-          npm -v
-      - name: Install npm
+      - name: Install
         script: |
           npm install
-      - name: Check folders
-        script: |
-          ls -la
-          ls -la ios/App || echo "ios missing"
-      - name: Capacitor sync
-        script: |
           npx cap sync ios
       - name: Pod install
         script: |
-          cd ios/App && pod install --repo-update
-      - name: Build
+          cd ios/App
+          pod deintegrate || true
+          pod install --repo-update
+          cp Podfile.lock Pods/Manifest.lock
+          ls -la Pods/Manifest.lock
+      - name: Build without signing
         script: |
-          xcodebuild -workspace ios/App/App.xcworkspace -scheme App -configuration Debug -sdk iphoneos -derivedDataPath ./build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+          rm -rf ./build
+          xcodebuild -workspace ios/App/App.xcworkspace -scheme App -configuration Debug -sdk iphoneos -derivedDataPath ./build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" COMPILER_INDEX_STORE_ENABLE=NO
     artifacts:
       - build/Build/Products/Debug-iphoneos/*.app
