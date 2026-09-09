@@ -1,0 +1,20 @@
+workflows:
+  ios-build:
+    name: iOS Build
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      node: 20
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install
+          npx cap sync ios
+          cd ios/App && pod install
+      - name: Build iOS without signing
+        script: |
+          xcodebuild -workspace ios/App/App.xcworkspace -scheme App -configuration Debug CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO -sdk iphoneos -derivedDataPath ./build
+    artifacts:
+      - build/Build/Products/Debug-iphoneos/*.app
