@@ -1,0 +1,9 @@
+{
+  "appId": "com.intrshop.cloudapp",
+  "appName": "IntrShop",
+  "webDir": "www",
+  "server": {
+    "url": "https://intrshop.cloud",
+    "cleartext": false
+  }
+}
